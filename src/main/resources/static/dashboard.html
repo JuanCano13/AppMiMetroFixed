@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | AppMiMetro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        /* Variables CSS para consistencia de colores y fondos */
+        :root {
+            --bg-dark: #1f1f1f;
+            --bg-sidebar: #2c2c2c;
+            --bg-panel: #292929;
+            --green: #4ade80;
+            --yellow: #facc15;
+            --red: #ef4444; /* Rojo para alertas críticas */
+            --text-light: #eaeaea;
+            --text-muted: #ccc;
+            --button-bg: #4caf50;
+            --button-hover: #43a047;
+            --link-hover: #4ade80;
+        }
+        /* Reset de estilos básico y configuración de fuente */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif; /* Fuente recomendada */
+            display: flex; /* Para layout de barra lateral y contenido principal */
+            height: 100vh; /* Ocupa el 100% de la altura de la ventana */
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow: hidden; /* Evita scroll no deseado en el body */
+        }
+
+        /* Estilos de la barra lateral (Sidebar) */
+        .sidebar {
+            width: 250px;
+            background-color: var(--bg-sidebar);
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+            flex-shrink: 0; /* Evita que la sidebar se encoja */
+            overflow-y: auto; /* Permite scroll si el contenido es muy largo */
+        }
+        .sidebar .app-title {
+            color: var(--green);
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .sidebar .app-title i {
+            font-size: 2rem;
+        }
+        .sidebar-nav ul {
+            list-style: none;
+            width: 100%;
+        }
+        .sidebar-nav ul li {
+            margin-bottom: 1rem;
+        }
+        .sidebar-nav ul li a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .sidebar-nav ul li a:hover,
+        .sidebar-nav ul li a.active {
+            background-color: rgba(74, 218, 128, 0.2); /* Fondo más claro para hover/activo */
+            color: var(--green); /* Color del texto a verde */
+        }
+        .sidebar-nav ul li a i {
+            font-size: 1.2rem;
+        }
+
+        /* Información del usuario y logout */
+        .user-info {
+            margin-top: auto; /* Empuja el contenido hacia abajo */
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            width: 100%;
+            text-align: center;
+        }
+        .user-info p {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+        .user-info p strong {
+            color: var(--text-light);
+        }
+        .user-info a {
+            color: var(--red);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--red);
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .user-info a:hover {
+            background-color: var(--red);
+            color: var(--text-light);
+        }
+
+        /* Estilos del contenido principal (Main Content) */
+        .main-content {
+            flex-grow: 1; /* Ocupa el espacio restante */
+            padding: 2rem;
+            overflow-y: auto; /* Permite scroll dentro del contenido principal */
+            background-color: var(--bg-dark);
+        }
+        .main-content h1, .main-content h2 {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .main-content .alert-panel {
+            background-color: var(--bg-panel);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .alert-panel h3 {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .alert-panel table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .alert-panel th, .alert-panel td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .alert-panel th {
+            color: var(--text-light);
+            background-color: rgba(255,255,255,0.05);
+        }
+        .alert-panel td {
+            color: var(--text-muted);
+        }
+        .alert-panel tr:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        /* Estilos de la cuadrícula de gráficas */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Columnas responsivas */
+            gap: 2rem; /* Espacio entre las gráficas */
+            margin-top: 2rem;
+        }
+
+        /* Estilos para los contenedores de las gráficas */
+        .charts-grid > div {
+            min-height: 350px; /* Altura mínima para cada gráfica */
+            background: var(--bg-panel);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex; /* Para centrar el mensaje de error si no carga */
+            justify-content: center;
+            align-items: center;
+        }
+        /* Mensajes de error dentro de las gráficas */
+        .charts-grid > div p {
+            color: var(--red);
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        /* Responsive design para pantallas pequeñas */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Apila sidebar y contenido */
+                height: auto;
+                min-height: 100vh;
+                overflow: auto;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                padding: 1rem;
+                flex-direction: row; /* Elementos de sidebar en fila */
+                justify-content: space-around;
+                align-items: center;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            }
+            .sidebar .app-title, .user-info {
+                display: none; /* Oculta título y usuario en móvil para ahorrar espacio */
+            }
+            .sidebar-nav ul {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+            .sidebar-nav ul li {
+                margin-bottom: 0;
+            }
+            .sidebar-nav ul li a {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.9rem;
+            }
+            .sidebar-nav ul li a i {
+                font-size: 1rem;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+            .charts-grid {
+                grid-template-columns: 1fr; /* Una columna en móvil */
+            }
+        }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="app-title">
+        <i class="fas fa-train-subway"></i> AppMiMetro
+    </div>
+    <nav class="sidebar-nav">
+        <ul>
+            <li><a href="#" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+            <li><a href="formulario.html"><i class="fas fa-file-alt"></i> Reportar Falla</a></li>
+            <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+        </ul>
+    </nav>
+    <div class="user-info">
+        <p>Bienvenido, <strong id="displayUsername">Usuario</strong></p>
+    </div>
+</aside>
+
+<main class="main-content">
+    <h1>Dashboard del Metro</h1>
+    <h2>Panel de Alertas Recientes</h2>
+    <div class="alert-panel">
+        <h3>Fallas Agrupadas por Estación y Tipo</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Estación</th>
+                <th>Tipo de Falla</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody id="fallasTableBody">
+            </tbody>
+        </table>
+        <p id="tableErrorMessage" style="text-align: center; color: var(--text-muted); margin-top: 1rem;"></p>
+    </div>
+
+    <h2>Visualización de Fallas</h2>
+    <div class="charts-grid">
+        <div id="chart-tipos-falla"></div>
+
+        <div id="chart-accidentes-estacion"></div>
+        <div id="chart-congestion-estacion"></div>
+        <div id="chart-congestion-hora"></div>
+        <div id="chart-total-fallas-estacion"></div>
+    </div>
+</main>
+
+<script>
+    // Función para mostrar el nombre de usuario recuperado del localStorage
+    function displayUsername() {
+        const username = localStorage.getItem('username');
+        if (username) {
+            document.getElementById('displayUsername').innerText = username;
+        } else {
+            // Si no hay nombre de usuario, redirige al login
+            window.location.href = "login.html";
+        }
+    }
+
+    // Función para cargar los datos del panel de alertas (tabla)
+    async function fetchFallas() {
+        const tableBody = document.getElementById('fallasTableBody');
+        const errorMessageElement = document.getElementById('tableErrorMessage');
+        tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Cargando fallas...</td></tr>';
+        errorMessageElement.innerText = '';
+
+        try {
+            const response = await fetch('http://localhost:8081/api/fallas/conteo');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No hay fallas reportadas aún.</td></tr>';
+            } else {
+                tableBody.innerHTML = ''; // Limpiar mensaje de carga
+                data.forEach(falla => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).innerText = falla.estacion;
+                    row.insertCell(1).innerText = falla.tipo;
+                    row.insertCell(2).innerText = falla.total;
+                });
+            }
+        } catch (error) {
+            console.error('Error al cargar fallas para la tabla:', error);
+            tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--red);">Error al cargar los datos.</td></tr>';
+            errorMessageElement.innerText = 'No se pudieron cargar las fallas.';
+        }
+    }
+
+    // *** FUNCIÓN PARA LA GRÁFICA DE TIPOS DE FALLA ***
+    async function drawTiposFallaChart() {
+        const chartDom = document.getElementById('chart-tipos-falla');
+        if (!chartDom) {
+            console.error('No se encontró el elemento DOM para la gráfica de tipos de falla.');
+            return;
+        }
+        // Asegurarse de que el chart se inicialice solo una vez si la función se llama varias veces
+        const myChart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom);
+        let option;
+
+        try {
+            const response = await fetch('http://localhost:8081/api/fallas/graficas/tipos-falla');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json(); // La respuesta del backend es JSON
+
+            // Prepara los datos para ECharts (formato [{name: 'Accidente', value: 10}, ...])
+            const chartData = data.map(item => ({
+                name: item.tipo,
+                value: item.total
+            }));
+
+            // Si no hay datos, muestra un mensaje
+            if (chartData.length === 0) {
+                chartDom.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">No hay datos de tipos de falla para mostrar.</p>';
+                myChart.clear(); // Limpia la gráfica si había algo
+                return;
+            }
+
+            option = {
+                title: {
+                    text: 'Fallas Reportadas por Tipo',
+                    subtext: 'Fuente: Datos del Metro',
+                    left: 'center',
+                    textStyle: {
+                        color: 'var(--text-light)' // Ajusta el color del título
+                    },
+                    subtextStyle: {
+                        color: 'var(--text-muted)' // Ajusta el color del subtítulo
+                    }
+                },
+                tooltip: {
+                    trigger: 'item', // Muestra tooltip al pasar el ratón
+                    formatter: '{a} <br/>{b}: {c} ({d}%)' // Formato del tooltip
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    data: chartData.map(item => item.name), // Nombres de los tipos de falla para la leyenda
+                    textStyle: {
+                        color: 'var(--text-light)' // Ajusta el color del texto de la leyenda
+                    }
+                },
+                series: [
+                    {
+                        name: 'Tipos de Falla',
+                        type: 'pie', // Tipo de gráfica: pastel (pie)
+                        radius: ['40%', '70%'], // Tamaño del "anillo" (dona)
+                        avoidLabelOverlap: false,
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: '20',
+                                fontWeight: 'bold',
+                                color: 'var(--text-light)'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        data: chartData // Los datos preparados
+                    }
+                ],
+                // Colores predefinidos de ECharts (puedes personalizarlos si quieres)
+                color: [
+                    '#5470C6', '#91CC75', '#EE6666', '#FC8452', '#73C0DE',
+                    '#3BA272', '#FC5280', '#9A60B4', '#EA7CCC'
+                ]
+            };
+            myChart.setOption(option);
+        } catch (error) {
+            console.error('Error al cargar gráfica de tipos de falla:', error);
+            chartDom.innerHTML = '<p style="text-align: center; color: var(--red); margin-top: 2rem;">Error al cargar el gráfico de tipos de falla.</p>';
+            //myChart.dispose(); // Opcional: si quieres destruir el objeto ECharts en caso de error
+        }
+    }
+
+
+    // Las otras funciones de gráfica (sin implementar aún)
+    async function drawAccidentesPorEstacionChart() {
+        const chartDom = document.getElementById('chart-accidentes-estacion');
+        if (!chartDom) return;
+        const myChart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom);
+        myChart.clear(); // Limpiar antes de dibujar
+        chartDom.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">Gráfica de Accidentes por Estación (Pendiente)</p>';
+    }
+
+    async function drawCongestionPorEstacionChart() {
+        const chartDom = document.getElementById('chart-congestion-estacion');
+        if (!chartDom) return;
+        const myChart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom);
+        myChart.clear();
+        chartDom.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">Gráfica de Congestión por Estación (Pendiente)</p>';
+    }
+
+    async function drawCongestionPorHoraChart() {
+        const chartDom = document.getElementById('chart-congestion-hora');
+        if (!chartDom) return;
+        const myChart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom);
+        myChart.clear();
+        chartDom.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">Gráfica de Congestión por Hora (Pendiente)</p>';
+    }
+
+    async function drawTotalFallasPorEstacionChart() {
+        const chartDom = document.getElementById('chart-total-fallas-estacion');
+        if (!chartDom) return;
+        const myChart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom);
+        myChart.clear();
+        chartDom.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">Gráfica de Total de Fallas por Estación (Pendiente)</p>';
+    }
+
+
+    // Inicialización de funciones al cargar el DOM
+    document.addEventListener('DOMContentLoaded', () => {
+        displayUsername(); // Muestra el nombre de usuario
+        fetchFallas();     // Carga los datos de la tabla de alertas
+
+        // Cargar y dibujar todas las gráficas con ECharts
+        drawTiposFallaChart(); // Esta es la que ya implementamos
+
+        // Las siguientes aún no están implementadas, por ahora solo muestran el mensaje "Pendiente"
+        drawAccidentesPorEstacionChart();
+        drawCongestionPorEstacionChart();
+        drawCongestionPorHoraChart();
+        drawTotalFallasPorEstacionChart();
+
+
+        // Listener para el botón de cerrar sesión
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('username'); // Elimina el nombre de usuario del almacenamiento local
+            alert('Sesión cerrada correctamente.');
+            window.location.href = 'login.html'; // Redirige al login
+        });
+
+        // Opcional: Configurar la actualización periódica de gráficas y tabla
+        // setInterval(fetchFallas, 15000); // Actualiza la tabla cada 15 segundos
+        // setInterval(drawTiposFallaChart, 30000); // Actualiza la gráfica de tipos de falla cada 30 segundos
+    });
+
+    // Asegurarse de que las gráficas se redibujen si la ventana cambia de tamaño
+    window.addEventListener('resize', () => {
+        const chartDom1 = document.getElementById('chart-tipos-falla');
+        const myChart1 = echarts.getInstanceByDom(chartDom1);
+        if (myChart1) myChart1.resize();
+
+        // Puedes añadir resize para las otras gráficas aquí cuando las implementes
+        // const chartDom2 = document.getElementById('chart-accidentes-estacion');
+        // const myChart2 = echarts.getInstanceByDom(chartDom2);
+        // if (myChart2) myChart2.resize();
+    });
+
+</script>
+</body>
+</html>

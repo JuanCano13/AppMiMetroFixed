@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reportar Falla | AppMiMetro</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="container">
+    <div class="form-wrapper">
+        <h1>Reportar Falla</h1>
+        <form id="fallaForm">
+            <label for="estacion">Estación</label>
+            <select id="estacion" required>
+                <option value="">Selecciona una estación</option>
+                <option value="Niquía">Niquía</option>
+                <option value="Bello">Bello</option>
+                <option value="Madera">Madera</option>
+                <option value="Acevedo">Acevedo</option>
+                <option value="Tricentenario">Tricentenario</option>
+                <option value="Caribe">Caribe</option>
+                <option value="Universidad">Universidad</option>
+                <option value="Hospital">Hospital</option>
+                <option value="Prado">Prado</option>
+                <option value="Parque Berrío">Parque Berrío</option>
+                <option value="San Antonio">San Antonio</option>
+                <option value="Alpujarra">Alpujarra</option>
+                <option value="Exposiciones">Exposiciones</option>
+                <option value="Industriales">Industriales</option>
+                <option value="Poblado">Poblado</option>
+                <option value="Aguacatala">Aguacatala</option>
+                <option value="Ayurá">Ayurá</option>
+                <option value="Envigado">Envigado</option>
+                <option value="Itagüí">Itagüí</option>
+                <option value="Sabaneta">Sabaneta</option>
+                <option value="La Estrella">La Estrella</option>
+            </select>
+
+            <label for="tipo">Tipo de Falla</label>
+            <select id="tipo" required>
+                <option value="">Selecciona un tipo de falla</option>
+                <option value="Accidente en la vía">Accidente en la vía</option>
+                <option value="Retraso en el metro">Retraso en el metro</option>
+                <option value="Congestión en la estación">Congestión en la estación</option>
+                <option value="Otro">Otro</option>
+            </select>
+
+            <label for="detalles">Descripción / Detalles</label>
+            <textarea id="detalles" rows="4" placeholder="Describe la situación con más detalle..." required></textarea>
+
+            <button type="submit">Enviar Reporte</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById("fallaForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const estacion = document.getElementById("estacion").value;
+        const tipo = document.getElementById("tipo").value;
+        const detalles = document.getElementById("detalles").value;
+
+        fetch("http://localhost:8081/api/fallas", {  <!-- ESTA LÍNEA CAMBIADA -->
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ estacion, tipo, detalles })
+        })
+            .then(res => {
+                if (res.ok) {
+                    alert("✅ Reporte enviado correctamente.");
+                    document.getElementById("fallaForm").reset();
+                } else {
+                    alert("❌ Hubo un error al enviar el reporte.");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("❌ No se pudo conectar con el servidor.");
+            });
+    });
+</script>
+
+</body>
+</html>

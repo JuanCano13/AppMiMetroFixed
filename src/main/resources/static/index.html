@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+    <meta charset="UTF-8">
+    <title>AppMiMetro - Registrarse</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <form id="registerForm" class="form">
+        <h1 class="logo">AppMiMetro</h1>
+        <p class="subtitle">Regístrate para crear una cuenta</p>
+
+        <label>
+            <span>Usuario</span>
+            <input type="text" id="username" placeholder="ej. juanperez" required>
+        </label>
+
+        <label>
+            <span>Contraseña</span>
+            <input type="password" id="password" placeholder="********" required>
+        </label>
+
+        <label>
+            <span>Correo Electrónico</span>
+            <input type="email" id="email" placeholder="ej. tu@correo.com" required>
+        </label>
+
+        <button type="submit" class="submit-btn">Registrarse</button>
+
+        <p class="message">
+        <p>¿Ya tienes cuenta? <a href="login.html" style="color: #4caf50; text-decoration: none;">Iniciar sesión</a></p>
+        </p>
+
+        <p id="response" class="response-message"></p>
+    </form>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
