@@ -5,82 +5,406 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reportar Falla | AppMiMetro</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+    <style>
+        /* Estilos adicionales para el formulario */
+        .form-wrapper {
+            position: relative;
+        }
+
+        .form-success {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid var(--green);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: var(--green);
+            text-align: center;
+            display: none;
+        }
+
+        .form-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--red);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: var(--red);
+            text-align: center;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(31, 31, 31, 0.8);
+            border-radius: 16px;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(74, 222, 128, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--green);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--green);
+            border-radius: 12px;
+            background: var(--bg-panel);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #22c55e;
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group select option {
+            background: var(--bg-panel);
+            color: var(--text-light);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: var(--green);
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .submit-btn:hover {
+            background: #22c55e;
+            transform: translateY(-3px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-icon {
+            margin-right: 0.5rem;
+        }
+
+        /* Estilos para las estaciones más reportadas */
+        .estaciones-destacadas {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-panel);
+            border: 2px solid var(--green);
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+        }
+
+        .estaciones-destacadas h3 {
+            color: var(--green);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .estaciones-destacadas h3 i {
+            margin-right: 0.5rem;
+        }
+
+        .estaciones-lista {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .estacion-tag {
+            padding: 0.4rem 0.8rem;
+            background: rgba(74, 222, 128, 0.1);
+            color: var(--green);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .estacion-tag:hover {
+            background: rgba(74, 222, 128, 0.2);
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <div class="form-wrapper">
-        <h1>Reportar Falla</h1>
-        <form id="fallaForm">
-            <label for="estacion">Estación</label>
-            <select id="estacion" required>
-                <option value="">Selecciona una estación</option>
-                <option value="Niquía">Niquía</option>
-                <option value="Bello">Bello</option>
-                <option value="Madera">Madera</option>
-                <option value="Acevedo">Acevedo</option>
-                <option value="Tricentenario">Tricentenario</option>
-                <option value="Caribe">Caribe</option>
-                <option value="Universidad">Universidad</option>
-                <option value="Hospital">Hospital</option>
-                <option value="Prado">Prado</option>
-                <option value="Parque Berrío">Parque Berrío</option>
-                <option value="San Antonio">San Antonio</option>
-                <option value="Alpujarra">Alpujarra</option>
-                <option value="Exposiciones">Exposiciones</option>
-                <option value="Industriales">Industriales</option>
-                <option value="Poblado">Poblado</option>
-                <option value="Aguacatala">Aguacatala</option>
-                <option value="Ayurá">Ayurá</option>
-                <option value="Envigado">Envigado</option>
-                <option value="Itagüí">Itagüí</option>
-                <option value="Sabaneta">Sabaneta</option>
-                <option value="La Estrella">La Estrella</option>
-            </select>
-
-            <label for="tipo">Tipo de Falla</label>
-            <select id="tipo" required>
-                <option value="">Selecciona un tipo de falla</option>
-                <option value="Accidente en la vía">Accidente en la vía</option>
-                <option value="Retraso en el metro">Retraso en el metro</option>
-                <option value="Congestión en la estación">Congestión en la estación</option>
-                <option value="Otro">Otro</option>
-            </select>
-
-            <label for="detalles">Descripción / Detalles</label>
-            <textarea id="detalles" rows="4" placeholder="Describe la situación con más detalle..." required></textarea>
-
-            <button type="submit">Enviar Reporte</button>
-        </form>
+<aside class="sidebar">
+    <div class="app-title">
+        <i class="fas fa-train-subway"></i> AppMiMetro
     </div>
-</div>
+    <nav class="sidebar-nav">
+        <ul>
+            <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+            <li><a href="#" class="active"><i class="fas fa-file-alt"></i> Reportar Falla</a></li>
+            <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+        </ul>
+    </nav>
+    <div class="user-info">
+        <p>Bienvenido, <strong id="displayUsername">Usuario</strong></p>
+    </div>
+</aside>
+<main class="main-content">
+    <h1>Reportar Falla</h1>
+
+    <div class="alert-panel form-wrapper">
+        <div class="loading" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+        </div>
+
+        <form id="fallaForm">
+            <div class="form-group">
+                <label for="estacion">Estación</label>
+                <select id="estacion" required>
+                    <option value="">Selecciona una estación</option>
+                    <option value="Niquía">Niquía</option>
+                    <option value="Bello">Bello</option>
+                    <option value="Madera">Madera</option>
+                    <option value="Acevedo">Acevedo</option>
+                    <option value="Tricentenario">Tricentenario</option>
+                    <option value="Caribe">Caribe</option>
+                    <option value="Universidad">Universidad</option>
+                    <option value="Hospital">Hospital</option>
+                    <option value="Prado">Prado</option>
+                    <option value="Parque Berrío">Parque Berrío</option>
+                    <option value="San Antonio">San Antonio</option>
+                    <option value="Alpujarra">Alpujarra</option>
+                    <option value="Exposiciones">Exposiciones</option>
+                    <option value="Industriales">Industriales</option>
+                    <option value="Poblado">Poblado</option>
+                    <option value="Aguacatala">Aguacatala</option>
+                    <option value="Ayurá">Ayurá</option>
+                    <option value="Envigado">Envigado</option>
+                    <option value="Itagüí">Itagüí</option>
+                    <option value="Sabaneta">Sabaneta</option>
+                    <option value="La Estrella">La Estrella</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tipo">Tipo de Falla</label>
+                <select id="tipo" required>
+                    <option value="">Selecciona un tipo de falla</option>
+                    <option value="Accidente en la vía">Accidente en la vía</option>
+                    <option value="Retraso en el metro">Retraso en el metro</option>
+                    <option value="Congestión en la estación">Congestión en la estación</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="detalles">Descripción / Detalles</label>
+                <textarea id="detalles" rows="4" placeholder="Describe la situación con más detalle..." required></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <i class="fas fa-paper-plane btn-icon"></i>
+                Enviar Reporte
+            </button>
+        </form>
+
+        <div class="form-success" id="formSuccess">
+            <i class="fas fa-check-circe"></i> ¡Reporte enviado correctamente! Gracias por tu colaboración.
+        </div>
+
+        <div class="form-error" id="formError">
+            <i class="fas fa-exclamation-circle"></i> <span id="errorMessage">Hubo un error al enviar el reporte.</span>
+        </div>
+    </div>
+
+    <div class="estaciones-destacadas">
+        <h3><i class="fas fa-fire"></i> Estaciones con más reportes recientes</h3>
+        <div class="estaciones-lista" id="estacionesDestacadas">
+            <span class="estacion-tag">Cargando...</span>
+        </div>
+    </div>
+</main>
 
 <script>
+    // Mostrar nombre de usuario
+    const username = localStorage.getItem('username');
+    if (username) {
+        document.getElementById('displayUsername').textContent = username;
+    }
+
+    // Funcionalidad de logout
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        localStorage.removeItem('username');
+        localStorage.removeItem('userId');
+        window.location.href = 'login.html';
+    });
+
+    // Funcionalidad del formulario
     document.getElementById("fallaForm").addEventListener("submit", function(e) {
         e.preventDefault();
 
         const estacion = document.getElementById("estacion").value;
         const tipo = document.getElementById("tipo").value;
         const detalles = document.getElementById("detalles").value;
+        const submitBtn = document.getElementById("submitBtn");
+        const loadingOverlay = document.getElementById("loadingOverlay");
+        const formSuccess = document.getElementById("formSuccess");
+        const formError = document.getElementById("formError");
 
-        fetch("http://localhost:8081/api/fallas", {  <!-- ESTA LÍNEA CAMBIADA -->
+        // Mostrar indicador de carga
+        loadingOverlay.style.display = 'flex';
+        submitBtn.disabled = true;
+
+        // Ocultar mensajes previos
+        formSuccess.style.display = 'none';
+        formError.style.display = 'none';
+
+        // Obtener ID de usuario del localStorage
+        const userId = localStorage.getItem('userId');
+
+        // Crear objeto con los datos del formulario
+        const fallaData = { estacion, tipo, detalles };
+
+        // Si hay un ID de usuario, agregarlo al objeto
+        if (userId) {
+            fallaData.usuarioId = userId;
+        }
+
+        fetch("http://localhost:8081/api/fallas", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ estacion, tipo, detalles })
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(fallaData)
         })
             .then(res => {
-                if (res.ok) {
-                    alert("✅ Reporte enviado correctamente.");
-                    document.getElementById("fallaForm").reset();
-                } else {
-                    alert("❌ Hubo un error al enviar el reporte.");
+                if (!res.ok) {
+                    throw new Error(`Error ${res.status}: ${res.statusText}`);
                 }
+                return res.json();
+            })
+            .then(data => {
+                // Ocultar indicador de carga
+                loadingOverlay.style.display = 'none';
+                submitBtn.disabled = false;
+
+                // Mostrar mensaje de éxito
+                formSuccess.style.display = 'block';
+
+                // Resetear formulario
+                document.getElementById("fallaForm").reset();
+
+                // Actualizar lista de estaciones destacadas
+                cargarEstacionesDestacadas();
+
+                // Después de 3 segundos, ocultar el mensaje de éxito
+                setTimeout(() => {
+                    formSuccess.style.display = 'none';
+                }, 3000);
             })
             .catch(err => {
                 console.error(err);
-                alert("❌ No se pudo conectar con el servidor.");
+
+                // Ocultar indicador de carga
+                loadingOverlay.style.display = 'none';
+                submitBtn.disabled = false;
+
+                // Mostrar mensaje de error
+                document.getElementById("errorMessage").textContent =
+                    err.message || "No se pudo conectar con el servidor.";
+                formError.style.display = 'block';
+
+                // Después de 5 segundos, ocultar el mensaje de error
+                setTimeout(() => {
+                    formError.style.display = 'none';
+                }, 5000);
             });
     });
-</script>
 
+    // Función para cargar estaciones destacadas
+    function cargarEstacionesDestacadas() {
+        const estacionesContainer = document.getElementById("estacionesDestacadas");
+
+        fetch("http://localhost:8081/api/fallas/graficas/fallas-por-estacion")
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`Error ${res.status}: ${res.statusText}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (!Array.isArray(data) || data.length === 0) {
+                    estacionesContainer.innerHTML = '<span class="estacion-tag">No hay datos disponibles</span>';
+                    return;
+                }
+
+                // Tomar solo las 5 estaciones con más reportes
+                const topEstaciones = data.slice(0, 5);
+
+                estacionesContainer.innerHTML = '';
+                topEstaciones.forEach(estacion => {
+                    const tag = document.createElement('span');
+                    tag.className = 'estacion-tag';
+                    tag.textContent = `${estacion.estacion} (${estacion.total})`;
+                    tag.addEventListener('click', function() {
+                        document.getElementById('estacion').value = estacion.estacion;
+                        document.getElementById('estacion').focus();
+                    });
+                    estacionesContainer.appendChild(tag);
+                });
+            })
+            .catch(err => {
+                console.error('Error cargando estaciones destacadas:', err);
+                estacionesContainer.innerHTML = '<span class="estacion-tag">Error al cargar datos</span>';
+            });
+    }
+
+    // Cargar estaciones destacadas al iniciar la página
+    cargarEstacionesDestacadas();
+</script>
 </body>
 </html>

@@ -4,228 +4,190 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard | AppMiMetro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css">
     <style>
-        /* Variables CSS para consistencia de colores y fondos */
-        :root {
-            --bg-dark: #1f1f1f;
-            --bg-sidebar: #2c2c2c;
-            --bg-panel: #292929;
-            --green: #4ade80;
-            --yellow: #facc15;
-            --red: #ef4444; /* Rojo para alertas críticas */
-            --text-light: #eaeaea;
-            --text-muted: #ccc;
-            --button-bg: #4caf50;
-            --button-hover: #43a047;
-            --link-hover: #4ade80;
+        /* Estilos adicionales para mejorar las gráficas */
+        .chart-container {
+            position: relative;
         }
-        /* Reset de estilos básico y configuración de fuente */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif; /* Fuente recomendada */
-            display: flex; /* Para layout de barra lateral y contenido principal */
-            height: 100vh; /* Ocupa el 100% de la altura de la ventana */
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            overflow: hidden; /* Evita scroll no deseado en el body */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(31, 31, 31, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: 16px;
         }
-
-        /* Estilos de la barra lateral (Sidebar) */
-        .sidebar {
-            width: 250px;
-            background-color: var(--bg-sidebar);
-            padding: 2rem 1rem;
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(74, 222, 128, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--green);
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .chart-error {
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
-            flex-shrink: 0; /* Evita que la sidebar se encoja */
-            overflow-y: auto; /* Permite scroll si el contenido es muy largo */
-        }
-        .sidebar .app-title {
-            color: var(--green);
-            font-size: 1.8rem;
-            margin-bottom: 2rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .sidebar .app-title i {
-            font-size: 2rem;
-        }
-        .sidebar-nav ul {
-            list-style: none;
-            width: 100%;
-        }
-        .sidebar-nav ul li {
-            margin-bottom: 1rem;
-        }
-        .sidebar-nav ul li a {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            color: var(--text-light);
-            text-decoration: none;
-            padding: 0.8rem 1rem;
-            border-radius: 8px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .sidebar-nav ul li a:hover,
-        .sidebar-nav ul li a.active {
-            background-color: rgba(74, 218, 128, 0.2); /* Fondo más claro para hover/activo */
-            color: var(--green); /* Color del texto a verde */
-        }
-        .sidebar-nav ul li a i {
-            font-size: 1.2rem;
-        }
-
-        /* Información del usuario y logout */
-        .user-info {
-            margin-top: auto; /* Empuja el contenido hacia abajo */
-            padding-top: 1rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            width: 100%;
-            text-align: center;
-        }
-        .user-info p {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
+            height: 100%;
             color: var(--text-muted);
+            text-align: center;
+            padding: 1rem;
         }
-        .user-info p strong {
-            color: var(--text-light);
-        }
-        .user-info a {
+        .chart-error i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
             color: var(--red);
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--red);
-            border-radius: 5px;
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        .user-info a:hover {
-            background-color: var(--red);
-            color: var(--text-light);
-        }
-
-        /* Estilos del contenido principal (Main Content) */
-        .main-content {
-            flex-grow: 1; /* Ocupa el espacio restante */
-            padding: 2rem;
-            overflow-y: auto; /* Permite scroll dentro del contenido principal */
-            background-color: var(--bg-dark);
-        }
-        .main-content h1, .main-content h2 {
-            color: var(--text-light);
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-        .main-content .alert-panel {
-            background-color: var(--bg-panel);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        .alert-panel h3 {
-            color: var(--text-light);
-            margin-bottom: 1rem;
-            text-align: center;
-        }
+        /* Mejoras en la tabla */
         .alert-panel table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 1rem;
         }
-        .alert-panel th, .alert-panel td {
+        .alert-panel th {
+            background: rgba(74, 222, 128, 0.1);
             padding: 0.8rem;
             text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .alert-panel th {
-            color: var(--text-light);
-            background-color: rgba(255,255,255,0.05);
+            color: var(--green);
+            font-weight: 600;
         }
         .alert-panel td {
-            color: var(--text-muted);
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
         }
         .alert-panel tr:hover {
-            background-color: rgba(255,255,255,0.05);
+            background: rgba(74, 222, 128, 0.05);
         }
-
-        /* Estilos de la cuadrícula de gráficas */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Columnas responsivas */
-            gap: 2rem; /* Espacio entre las gráficas */
-            margin-top: 2rem;
+        /* Animación para las filas de la tabla */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        /* Estilos para los contenedores de las gráficas */
-        .charts-grid > div {
-            min-height: 350px; /* Altura mínima para cada gráfica */
+        .alert-panel tbody tr {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        /* Filtros de fecha */
+        .date-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 0.5rem 1rem;
             background: var(--bg-panel);
+            border: 2px solid var(--green);
             border-radius: 8px;
-            padding: 1rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            display: flex; /* Para centrar el mensaje de error si no carga */
-            justify-content: center;
-            align-items: center;
+            color: var(--green);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
-        /* Mensajes de error dentro de las gráficas */
-        .charts-grid > div p {
-            color: var(--red);
-            font-size: 1.1rem;
+        .filter-btn:hover {
+            background: rgba(74, 222, 128, 0.1);
+            transform: translateY(-2px);
+        }
+        .filter-btn.active {
+            background: var(--green);
+            color: var(--bg-dark);
+        }
+        /* Resumen ejecutivo */
+        .executive-summary {
+            background: var(--bg-panel);
+            border: 2px solid var(--green);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .summary-item {
             text-align: center;
+            padding: 1rem;
+            background: rgba(74, 222, 128, 0.05);
+            border-radius: 8px;
         }
-
-        /* Responsive design para pantallas pequeñas */
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column; /* Apila sidebar y contenido */
-                height: auto;
-                min-height: 100vh;
-                overflow: auto;
-            }
-            .sidebar {
-                width: 100%;
-                height: auto;
-                padding: 1rem;
-                flex-direction: row; /* Elementos de sidebar en fila */
-                justify-content: space-around;
-                align-items: center;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            }
-            .sidebar .app-title, .user-info {
-                display: none; /* Oculta título y usuario en móvil para ahorrar espacio */
-            }
-            .sidebar-nav ul {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 0.5rem;
-            }
-            .sidebar-nav ul li {
-                margin-bottom: 0;
-            }
-            .sidebar-nav ul li a {
-                padding: 0.5rem 0.8rem;
-                font-size: 0.9rem;
-            }
-            .sidebar-nav ul li a i {
-                font-size: 1rem;
-            }
-            .main-content {
-                padding: 1rem;
-            }
-            .charts-grid {
-                grid-template-columns: 1fr; /* Una columna en móvil */
-            }
+        .summary-item h4 {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .summary-item .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--green);
+        }
+        .summary-item .trend {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+        .trend-up {
+            color: #ef4444;
+        }
+        .trend-down {
+            color: #22c55e;
+        }
+        /* Badges de urgencia */
+        .urgency-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .urgency-medium {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .urgency-low {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        /* Botón expandir */
+        .expand-btn {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .expand-btn button {
+            background: transparent;
+            border: 1px solid var(--green);
+            color: var(--green);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .expand-btn button:hover {
+            background: rgba(74, 222, 128, 0.1);
         }
     </style>
 </head>
@@ -245,249 +207,837 @@
         <p>Bienvenido, <strong id="displayUsername">Usuario</strong></p>
     </div>
 </aside>
-
 <main class="main-content">
     <h1>Dashboard del Metro</h1>
-    <h2>Panel de Alertas Recientes</h2>
+    <!-- Filtros de fecha -->
+    <div class="date-filters">
+        <button class="filter-btn active" data-range="today">Hoy</button>
+        <button class="filter-btn" data-range="week">Última semana</button>
+        <button class="filter-btn" data-range="month">Último mes</button>
+        <button class="filter-btn" data-range="all">Todo</button>
+    </div>
+    <!-- Resumen ejecutivo -->
+    <div class="executive-summary">
+        <h3>Resumen de Operaciones</h3>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <h4>Incidentes Críticos</h4>
+                <div class="value" id="criticalIncidents">-</div>
+                <div class="trend trend-up"><i class="fas fa-arrow-up"></i> 2 vs ayer</div>
+            </div>
+            <div class="summary-item">
+                <h4>Estaciones Afectadas</h4>
+                <div class="value" id="affectedStations">-</div>
+                <div class="trend trend-down"><i class="fas fa-arrow-down"></i> 1 vs ayer</div>
+            </div>
+            <div class="summary-item">
+                <h4>Tiempo Promedio Respuesta</h4>
+                <div class="value" id="responseTime">12m</div>
+                <div class="trend trend-down"><i class="fas fa-arrow-down"></i> 3m mejor</div>
+            </div>
+            <div class="summary-item">
+                <h4>Satisfacción Usuarios</h4>
+                <div class="value" id="satisfaction">87%</div>
+                <div class="trend trend-up"><i class="fas fa-arrow-up"></i> 5% mejor</div>
+            </div>
+        </div>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Total Reportes</h3>
+                <p class="stat-value" id="totalReportes">-</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-subway"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Estaciones Afectadas</h3>
+                <p class="stat-value" id="estacionesAfectadas">-</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Reportes Hoy</h3>
+                <p class="stat-value" id="reportesHoy">-</p>
+            </div>
+        </div>
+    </div>
+    <h2>Alertas Recientes</h2>
     <div class="alert-panel">
         <h3>Fallas Agrupadas por Estación y Tipo</h3>
-        <table>
-            <thead>
-            <tr>
-                <th>Estación</th>
-                <th>Tipo de Falla</th>
-                <th>Total</th>
-            </tr>
-            </thead>
-            <tbody id="fallasTableBody">
-            </tbody>
-        </table>
-        <p id="tableErrorMessage" style="text-align: center; color: var(--text-muted); margin-top: 1rem;"></p>
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Estación</th>
+                    <th>Tipo de Falla</th>
+                    <th>Total</th>
+                </tr>
+                </thead>
+                <tbody id="fallasTableBody">
+                <tr>
+                    <td colspan="3" style="text-align: center; color: var(--text-muted);">
+                        <div class="spinner" style="margin: 1rem auto;"></div>
+                        Cargando datos...
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <p id="tableErrorMessage" style="text-align:center;color:var(--text-muted);margin-top:1rem;"></p>
     </div>
-
     <h2>Visualización de Fallas</h2>
     <div class="charts-grid">
-        <div id="chart-tipos-falla"></div>
-
-        <div id="chart-accidentes-estacion"></div>
-        <div id="chart-congestion-estacion"></div>
-        <div id="chart-congestion-hora"></div>
-        <div id="chart-total-fallas-estacion"></div>
+        <div class="chart-container">
+            <div class="chart-title">Tipos de Falla</div>
+            <div class="chart-content" id="chart-tipos-falla">
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Accidentes por Estación</div>
+            <div class="chart-content" id="chart-accidentes-estacion">
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Congestión por Estación</div>
+            <div class="chart-content" id="chart-congestion-estacion">
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Congestión por Hora</div>
+            <div class="chart-content" id="chart-congestion-hora">
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Total Fallas por Estación</div>
+            <div class="chart-content" id="chart-total-fallas-estacion">
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
-
 <script>
-    // Función para mostrar el nombre de usuario recuperado del localStorage
-    function displayUsername() {
-        const username = localStorage.getItem('username');
-        if (username) {
-            document.getElementById('displayUsername').innerText = username;
-        } else {
-            // Si no hay nombre de usuario, redirige al login
-            window.location.href = "login.html";
-        }
-    }
+    // Colores pastel mejorados para las gráficas
+    const chartColors = [
+        '#FF6B6B', // Rojo suave
+        '#4ECDC4', // Turquesa suave
+        '#45B7D1', // Azul suave
+        '#FFA07A', // Coral suave
+        '#98D8C8', // Menta suave
+        '#F7DC6F', // Amarillo suave
+        '#BB8FCE', // Lila suave
+        '#85C1E2', // Azul cielo suave
+        '#F8C471', // Naranja suave
+        '#82E0AA'  // Verde menta suave
+    ];
 
-    // Función para cargar los datos del panel de alertas (tabla)
-    async function fetchFallas() {
-        const tableBody = document.getElementById('fallasTableBody');
-        const errorMessageElement = document.getElementById('tableErrorMessage');
-        tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Cargando fallas...</td></tr>';
-        errorMessageElement.innerText = '';
+    // Almacenar las instancias de las gráficas para poder actualizarlas
+    const chartInstances = {};
 
-        try {
-            const response = await fetch('http://localhost:8081/api/fallas/conteo');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
+    // Función para inicializar una gráfica con manejo de errores y carga
+    function initChart(id, url, optionsGenerator) {
+        const chartDom = document.getElementById(id);
+        const myChart = echarts.init(chartDom);
 
-            if (data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No hay fallas reportadas aún.</td></tr>';
-            } else {
-                tableBody.innerHTML = ''; // Limpiar mensaje de carga
-                data.forEach(falla => {
-                    const row = tableBody.insertRow();
-                    row.insertCell(0).innerText = falla.estacion;
-                    row.insertCell(1).innerText = falla.tipo;
-                    row.insertCell(2).innerText = falla.total;
+        // Guardar la instancia de la gráfica
+        chartInstances[id] = myChart;
+
+        // Mostrar indicador de carga
+        const loadingOverlay = chartDom.querySelector('.loading-overlay');
+
+        function loadChart() {
+            fetch(url)
+                .then(res => {
+                    if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+                    return res.json();
+                })
+                .then(data => {
+                    if (!Array.isArray(data)) throw new Error("Datos inválidos para la gráfica " + id);
+                    // Ocultar indicador de carga
+                    if (loadingOverlay) loadingOverlay.style.display = 'none';
+                    // Generar opciones específicas para esta gráfica
+                    const option = optionsGenerator(data);
+                    myChart.setOption(option, true); // El segundo parámetro 'true' indica que debe reemplazar todas las opciones
+                })
+                .catch(err => {
+                    console.error(`Error cargando gráfica ${id}:`, err);
+                    // Ocultar indicador de carga y mostrar error
+                    if (loadingOverlay) loadingOverlay.style.display = 'none';
+                    chartDom.innerHTML = `
+                        <div class="chart-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Error cargando la gráfica</p>
+                            <small>${err.message}</small>
+                        </div>
+                    `;
                 });
-            }
-        } catch (error) {
-            console.error('Error al cargar fallas para la tabla:', error);
-            tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--red);">Error al cargar los datos.</td></tr>';
-            errorMessageElement.innerText = 'No se pudieron cargar las fallas.';
         }
+
+        // Cargar la gráfica inicialmente
+        loadChart();
+
+        // Devolver una función para actualizar la gráfica
+        return loadChart;
     }
 
-    // *** FUNCIÓN PARA LA GRÁFICA DE TIPOS DE FALLA ***
-    async function drawTiposFallaChart() {
-        const chartDom = document.getElementById('chart-tipos-falla');
-        if (!chartDom) {
-            console.error('No se encontró el elemento DOM para la gráfica de tipos de falla.');
-            return;
-        }
-        // Asegurarse de que el chart se inicialice solo una vez si la función se llama varias veces
-        const myChart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom);
-        let option;
+    // Función para actualizar una gráfica específica
+    function updateChart(id) {
+        const myChart = chartInstances[id];
+        if (!myChart) return;
 
-        try {
-            const response = await fetch('http://localhost:8081/api/fallas/graficas/tipos-falla');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+        const chartDom = document.getElementById(id);
+        const loadingOverlay = chartDom.querySelector('.loading-overlay');
+
+        // Mostrar indicador de carga
+        if (loadingOverlay) loadingOverlay.style.display = 'flex';
+
+        const url = endpoints[id];
+        const optionsGenerator = chartOptionsGenerators[id];
+
+        fetch(url)
+            .then(res => {
+                if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+                return res.json();
+            })
+            .then(data => {
+                if (!Array.isArray(data)) throw new Error("Datos inválidos para la gráfica " + id);
+                // Ocultar indicador de carga
+                if (loadingOverlay) loadingOverlay.style.display = 'none';
+                // Generar opciones específicas para esta gráfica
+                const option = optionsGenerator(data);
+                myChart.setOption(option, true); // El segundo parámetro 'true' indica que debe reemplazar todas las opciones
+            })
+            .catch(err => {
+                console.error(`Error actualizando gráfica ${id}:`, err);
+                // Ocultar indicador de carga y mostrar error
+                if (loadingOverlay) loadingOverlay.style.display = 'none';
+                chartDom.innerHTML = `
+                    <div class="chart-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Error actualizando la gráfica</p>
+                        <small>${err.message}</small>
+                    </div>
+                `;
+            });
+    }
+
+    // Funciones generadoras de opciones para cada tipo de gráfica
+    const chartOptionsGenerators = {
+        'chart-tipos-falla': (data) => ({
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}: {c} ({d}%)',
+                backgroundColor: 'rgba(37, 37, 37, 0.9)',
+                borderColor: '#4ade80',
+                textStyle: {
+                    color: '#f1f1f1'
+                }
+            },
+            legend: {
+                orient: 'horizontal',
+                bottom: 10,
+                textStyle: {
+                    color: '#eaeaea'
+                }
+            },
+            series: [
+                {
+                    name: 'Tipos de Falla',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#1f1f1f',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: false,
+                        position: 'center'
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: 16,
+                            fontWeight: 'bold',
+                            color: '#eaeaea'
+                        },
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    labelLine: {
+                        show: false
+                    },
+                    data: data.map((d, i) => ({
+                        name: d.tipo,
+                        value: d.total,
+                        itemStyle: {
+                            color: chartColors[i % chartColors.length]
+                        }
+                    }))
+                }
+            ]
+        }),
+        'chart-accidentes-estacion': (data) => ({
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                },
+                backgroundColor: 'rgba(37, 37, 37, 0.9)',
+                borderColor: '#4ade80',
+                textStyle: {
+                    color: '#f1f1f1'
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '15%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: data.map(d => d.estacion),
+                axisLabel: {
+                    rotate: 45,
+                    interval: 0,
+                    color: '#eaeaea',
+                    fontSize: 12
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: 'rgba(74, 222, 128, 0.3)'
+                    }
+                }
+            },
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    color: '#eaeaea'
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: 'rgba(74, 222, 128, 0.3)'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    }
+                }
+            },
+            dataZoom: [
+                {
+                    type: 'slider',
+                    show: true,
+                    start: 0,
+                    end: 50,
+                    bottom: 0,
+                    height: 20,
+                    textStyle: {
+                        color: '#eaeaea'
+                    },
+                    handleStyle: {
+                        color: '#4ade80'
+                    },
+                    dataBackground: {
+                        lineStyle: {
+                            color: 'rgba(74, 222, 128, 0.3)'
+                        },
+                        areaStyle: {
+                            color: 'rgba(74, 222, 128, 0.1)'
+                        }
+                    }
+                }
+            ],
+            series: [{
+                name: 'Total Reportes',
+                type: 'bar',
+                data: data.map((d, i) => ({
+                    value: d.total,
+                    itemStyle: {
+                        color: chartColors[i % chartColors.length],
+                        borderRadius: [5, 5, 0, 0]
+                    }
+                })),
+                animationDelay: function (idx) {
+                    return idx * 100;
+                }
+            }],
+            animationEasing: 'elasticOut',
+            animationDelayUpdate: function (idx) {
+                return idx * 5;
             }
-            const data = await response.json(); // La respuesta del backend es JSON
+        }),
+        'chart-congestion-estacion': (data) => ({
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                },
+                backgroundColor: 'rgba(37, 37, 37, 0.9)',
+                borderColor: '#4ade80',
+                textStyle: {
+                    color: '#f1f1f1'
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value',
+                axisLabel: {
+                    color: '#eaeaea'
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: 'rgba(74, 222, 128, 0.3)'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    }
+                }
+            },
+            yAxis: {
+                type: 'category',
+                data: data.map(d => d.estacion),
+                axisLabel: {
+                    color: '#eaeaea',
+                    fontSize: 12
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: 'rgba(74, 222, 128, 0.3)'
+                    }
+                }
+            },
+            series: [{
+                name: 'Reportes',
+                type: 'bar',
+                data: data.map((d, i) => ({
+                    value: d.total,
+                    itemStyle: {
+                        color: chartColors[i % chartColors.length],
+                        borderRadius: [0, 4, 4, 0]
+                    }
+                })),
+                barWidth: '60%',
+                label: {
+                    show: true,
+                    position: 'right',
+                    color: '#eaeaea',
+                    fontSize: 12,
+                    fontWeight: 'bold'
+                },
+                animationDelay: function (idx) {
+                    return idx * 100;
+                }
+            }],
+            animationEasing: 'elasticOut',
+            animationDelayUpdate: function (idx) {
+                return idx * 5;
+            }
+        }),
+        'chart-congestion-hora': (data) => {
+            // Verificar si hay datos
+            if (!data || data.length === 0) {
+                return {
+                    title: {
+                        text: 'No hay datos disponibles',
+                        left: 'center',
+                        top: 'center',
+                        textStyle: {
+                            color: '#eaeaea'
+                        }
+                    }
+                };
+            }
 
-            // Prepara los datos para ECharts (formato [{name: 'Accidente', value: 10}, ...])
-            const chartData = data.map(item => ({
-                name: item.tipo,
-                value: item.total
-            }));
+            // Obtener todas las horas únicas y ordenarlas
+            const horas = [...new Set(data.map(item => item.hora))].sort((a, b) => a - b);
 
-            // Si no hay datos, muestra un mensaje
-            if (chartData.length === 0) {
-                chartDom.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">No hay datos de tipos de falla para mostrar.</p>';
-                myChart.clear(); // Limpia la gráfica si había algo
+            // Crear una sola serie para todos los datos (no hay agrupación por estación)
+            const series = [{
+                name: 'Congestión',
+                type: 'line',
+                data: horas.map(hora => {
+                    const item = data.find(d => d.hora === hora);
+                    return item ? item.total : 0;
+                }),
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 8,
+                lineStyle: {
+                    width: 3,
+                    color: chartColors[2],
+                    shadowColor: 'rgba(74, 222, 128, 0.5)',
+                    shadowBlur: 10
+                },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: chartColors[2] + '80' },
+                        { offset: 1, color: chartColors[2] + '20' }
+                    ])
+                }
+            }];
+
+            return {
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(37, 37, 37, 0.9)',
+                    borderColor: '#4ade80',
+                    textStyle: {
+                        color: '#f1f1f1'
+                    }
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {
+                            title: 'Guardar como imagen'
+                        }
+                    },
+                    iconStyle: {
+                        borderColor: '#eaeaea'
+                    },
+                    top: 10,
+                    right: 10
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    top: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: horas.map(hora => hora + ':00'),
+                    axisLabel: {
+                        color: '#eaeaea',
+                        interval: 2  // Mostrar cada 3 horas para evitar saturación
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: 'rgba(74, 222, 128, 0.3)'
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        color: '#eaeaea'
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: 'rgba(74, 222, 128, 0.3)'
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        }
+                    }
+                },
+                series: series
+            };
+        },
+        'chart-total-fallas-estacion': (data) => ({
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                },
+                backgroundColor: 'rgba(37, 37, 37, 0.9)',
+                borderColor: '#4ade80',
+                textStyle: {
+                    color: '#f1f1f1'
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '15%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: data.map(d => d.estacion),
+                axisLabel: {
+                    rotate: 45,
+                    interval: 0,
+                    color: '#eaeaea',
+                    fontSize: 12
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: 'rgba(74, 222, 128, 0.3)'
+                    }
+                }
+            },
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    color: '#eaeaea'
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: 'rgba(74, 222, 128, 0.3)'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    }
+                }
+            },
+            dataZoom: [
+                {
+                    type: 'slider',
+                    show: true,
+                    start: 0,
+                    end: 50,
+                    bottom: 0,
+                    height: 20,
+                    textStyle: {
+                        color: '#eaeaea'
+                    },
+                    handleStyle: {
+                        color: '#4ade80'
+                    },
+                    dataBackground: {
+                        lineStyle: {
+                            color: 'rgba(74, 222, 128, 0.3)'
+                        },
+                        areaStyle: {
+                            color: 'rgba(74, 222, 128, 0.1)'
+                        }
+                    }
+                }
+            ],
+            series: [{
+                type: 'bar',
+                data: data.map((d, i) => ({
+                    value: d.total,
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: chartColors[i % chartColors.length] },
+                            { offset: 1, color: chartColors[(i+1) % chartColors.length] }
+                        ]),
+                        borderRadius: [5, 5, 0, 0]
+                    }
+                })),
+                barWidth: '60%',
+                animationDelay: function (idx) {
+                    return idx * 100;
+                }
+            }],
+            animationEasing: 'elasticOut',
+            animationDelayUpdate: function (idx) {
+                return idx * 5;
+            }
+        })
+    };
+    // Endpoints para las gráficas
+    const endpoints = {
+        'chart-tipos-falla': 'http://localhost:8081/api/fallas/graficas/tipos-falla',
+        'chart-accidentes-estacion': 'http://localhost:8081/api/fallas/graficas/accidentes-por-estacion',
+        'chart-congestion-estacion': 'http://localhost:8081/api/fallas/graficas/congestion-por-estacion',
+        'chart-congestion-hora': 'http://localhost:8081/api/fallas/graficas/congestion-hora',
+        'chart-total-fallas-estacion': 'http://localhost:8081/api/fallas/graficas/fallas-por-estacion'
+    };
+
+    // Inicializar todas las gráficas
+    for (const [id, url] of Object.entries(endpoints)) {
+        initChart(id, url, chartOptionsGenerators[id]);
+    }
+
+    // Actualizar las gráficas cada 30 segundos
+    setInterval(() => {
+        for (const id in chartInstances) {
+            updateChart(id);
+        }
+    }, 30000);
+
+    // Llenar tabla de fallas por estacion
+    fetch('http://localhost:8081/api/fallas/conteo')
+        .then(res => {
+            if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+            return res.json();
+        })
+        .then(data => {
+            const tbody = document.getElementById('fallasTableBody');
+            const errorMessage = document.getElementById('tableErrorMessage');
+            if (!Array.isArray(data) || data.length === 0) {
+                errorMessage.textContent = 'No hay datos para mostrar';
+                tbody.innerHTML = '';
                 return;
             }
-
-            option = {
-                title: {
-                    text: 'Fallas Reportadas por Tipo',
-                    subtext: 'Fuente: Datos del Metro',
-                    left: 'center',
-                    textStyle: {
-                        color: 'var(--text-light)' // Ajusta el color del título
-                    },
-                    subtextStyle: {
-                        color: 'var(--text-muted)' // Ajusta el color del subtítulo
-                    }
-                },
-                tooltip: {
-                    trigger: 'item', // Muestra tooltip al pasar el ratón
-                    formatter: '{a} <br/>{b}: {c} ({d}%)' // Formato del tooltip
-                },
-                legend: {
-                    orient: 'vertical',
-                    left: 'left',
-                    data: chartData.map(item => item.name), // Nombres de los tipos de falla para la leyenda
-                    textStyle: {
-                        color: 'var(--text-light)' // Ajusta el color del texto de la leyenda
-                    }
-                },
-                series: [
-                    {
-                        name: 'Tipos de Falla',
-                        type: 'pie', // Tipo de gráfica: pastel (pie)
-                        radius: ['40%', '70%'], // Tamaño del "anillo" (dona)
-                        avoidLabelOverlap: false,
-                        label: {
-                            show: false,
-                            position: 'center'
-                        },
-                        emphasis: {
-                            label: {
-                                show: true,
-                                fontSize: '20',
-                                fontWeight: 'bold',
-                                color: 'var(--text-light)'
-                            }
-                        },
-                        labelLine: {
-                            show: false
-                        },
-                        data: chartData // Los datos preparados
-                    }
-                ],
-                // Colores predefinidos de ECharts (puedes personalizarlos si quieres)
-                color: [
-                    '#5470C6', '#91CC75', '#EE6666', '#FC8452', '#73C0DE',
-                    '#3BA272', '#FC5280', '#9A60B4', '#EA7CCC'
-                ]
-            };
-            myChart.setOption(option);
-        } catch (error) {
-            console.error('Error al cargar gráfica de tipos de falla:', error);
-            chartDom.innerHTML = '<p style="text-align: center; color: var(--red); margin-top: 2rem;">Error al cargar el gráfico de tipos de falla.</p>';
-            //myChart.dispose(); // Opcional: si quieres destruir el objeto ECharts en caso de error
-        }
-    }
-
-
-    // Las otras funciones de gráfica (sin implementar aún)
-    async function drawAccidentesPorEstacionChart() {
-        const chartDom = document.getElementById('chart-accidentes-estacion');
-        if (!chartDom) return;
-        const myChart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom);
-        myChart.clear(); // Limpiar antes de dibujar
-        chartDom.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">Gráfica de Accidentes por Estación (Pendiente)</p>';
-    }
-
-    async function drawCongestionPorEstacionChart() {
-        const chartDom = document.getElementById('chart-congestion-estacion');
-        if (!chartDom) return;
-        const myChart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom);
-        myChart.clear();
-        chartDom.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">Gráfica de Congestión por Estación (Pendiente)</p>';
-    }
-
-    async function drawCongestionPorHoraChart() {
-        const chartDom = document.getElementById('chart-congestion-hora');
-        if (!chartDom) return;
-        const myChart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom);
-        myChart.clear();
-        chartDom.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">Gráfica de Congestión por Hora (Pendiente)</p>';
-    }
-
-    async function drawTotalFallasPorEstacionChart() {
-        const chartDom = document.getElementById('chart-total-fallas-estacion');
-        if (!chartDom) return;
-        const myChart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom);
-        myChart.clear();
-        chartDom.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">Gráfica de Total de Fallas por Estación (Pendiente)</p>';
-    }
-
-
-    // Inicialización de funciones al cargar el DOM
-    document.addEventListener('DOMContentLoaded', () => {
-        displayUsername(); // Muestra el nombre de usuario
-        fetchFallas();     // Carga los datos de la tabla de alertas
-
-        // Cargar y dibujar todas las gráficas con ECharts
-        drawTiposFallaChart(); // Esta es la que ya implementamos
-
-        // Las siguientes aún no están implementadas, por ahora solo muestran el mensaje "Pendiente"
-        drawAccidentesPorEstacionChart();
-        drawCongestionPorEstacionChart();
-        drawCongestionPorHoraChart();
-        drawTotalFallasPorEstacionChart();
-
-
-        // Listener para el botón de cerrar sesión
-        document.getElementById('logoutBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('username'); // Elimina el nombre de usuario del almacenamiento local
-            alert('Sesión cerrada correctamente.');
-            window.location.href = 'login.html'; // Redirige al login
+            errorMessage.textContent = '';
+            tbody.innerHTML = '';
+            data.forEach((d, index) => {
+                const tr = document.createElement('tr');
+                tr.style.animationDelay = `${index * 0.05}s`;
+                tr.innerHTML = `
+                    <td>${d.estacion}</td>
+                    <td>${d.tipo}</td>
+                    <td><span class="badge">${d.total}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById('tableErrorMessage').textContent = 'Error cargando los datos de la tabla';
+            document.getElementById('fallasTableBody').innerHTML = `
+                <tr>
+                    <td colspan="3" style="text-align: center; color: var(--red);">
+                        <i class="fas fa-exclamation-circle"></i> Error al cargar datos
+                    </td>
+                </tr>
+            `;
         });
 
-        // Opcional: Configurar la actualización periódica de gráficas y tabla
-        // setInterval(fetchFallas, 15000); // Actualiza la tabla cada 15 segundos
-        // setInterval(drawTiposFallaChart, 30000); // Actualiza la gráfica de tipos de falla cada 30 segundos
+    // Cargar estadísticas generales
+    function cargarEstadisticas() {
+        fetch('http://localhost:8081/api/fallas/estadisticas')
+            .then(res => {
+                if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+                return res.json();
+            })
+            .then(data => {
+                document.getElementById('totalReportes').textContent = data.totalReportes || '-';
+                document.getElementById('estacionesAfectadas').textContent = data.estacionesAfectadas || '-';
+                document.getElementById('reportesHoy').textContent = data.reportesHoy || '-';
+            })
+            .catch(err => {
+                console.error('Error cargando estadísticas:', err);
+            });
+    }
+
+    // Cargar estadísticas inicialmente y luego cada 30 segundos
+    cargarEstadisticas();
+    setInterval(cargarEstadisticas, 30000);
+
+    // Mostrar nombre de usuario
+    const username = localStorage.getItem('username');
+    if (username) {
+        document.getElementById('displayUsername').textContent = username;
+    }
+
+    // Funcionalidad de logout
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        localStorage.removeItem('username');
+        localStorage.removeItem('userId');
+        window.location.href = 'login.html';
     });
-
-    // Asegurarse de que las gráficas se redibujen si la ventana cambia de tamaño
-    window.addEventListener('resize', () => {
-        const chartDom1 = document.getElementById('chart-tipos-falla');
-        const myChart1 = echarts.getInstanceByDom(chartDom1);
-        if (myChart1) myChart1.resize();
-
-        // Puedes añadir resize para las otras gráficas aquí cuando las implementes
-        // const chartDom2 = document.getElementById('chart-accidentes-estacion');
-        // const myChart2 = echarts.getInstanceByDom(chartDom2);
-        // if (myChart2) myChart2.resize();
-    });
-
 </script>
+<style>
+    /* Estilos para las tarjetas de estadísticas */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: var(--bg-panel);
+        border: 2px solid var(--green);
+        border-radius: 16px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+        transition: transform 0.2s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+    }
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: rgba(74, 222, 128, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 1rem;
+    }
+    .stat-icon i {
+        font-size: 1.5rem;
+        color: var(--green);
+    }
+    .stat-info h3 {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--green);
+        margin: 0;
+    }
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        background: rgba(74, 222, 128, 0.2);
+        color: var(--green);
+        border-radius: 4px;
+        font-weight: 600;
+    }
+    .table-container {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    /* Scrollbar personalizado */
+    .table-container::-webkit-scrollbar {
+        width: 8px;
+    }
+    .table-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+    }
+    .table-container::-webkit-scrollbar-thumb {
+        background: rgba(74, 222, 128, 0.3);
+        border-radius: 4px;
+    }
+    .table-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(74, 222, 128, 0.5);
+    }
+</style>
 </body>
 </html>

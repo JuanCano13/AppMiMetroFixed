@@ -1,195 +1,199 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <title>Iniciar Sesión | AppMiMetro</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <style>
-        :root {
-            --bg-dark: #1c1e26;
-            --bg-panel: #2a2e37;
-            --green: #4caf50;
-            --green-hover: #43a047;
-            --text-light: #eaeaea;
-            --text-muted: #ccc;
-            --input-bg: #3b404d;
-            --input-border: #4a4f5d;
-            --placeholder-color: #888;
-        }
-
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        body {
-            background: var(--bg-dark);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            color: var(--text-light);
-        }
-
-        .login-container {
-            background: var(--bg-panel);
-            border: 2px solid var(--green);
-            border-radius: 16px;
-            padding: 2rem 2.5rem;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .logo {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-
-        .logo i {
-            font-size: 3rem;
-            color: var(--green);
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--green);
-            margin: 0;
-            font-size: 1.8rem;
-        }
-
-        p {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-top: 0.3rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.4rem;
-            font-weight: 500;
-            color: var(--text-light);
-        }
-
-        .form-control-wrapper {
-            position: relative;
-        }
-
-        .form-control-wrapper i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--placeholder-color);
-        }
-
-        .form-control-wrapper input {
-            width: 100%;
-            padding: 0.8rem 0.8rem 0.8rem 2.5rem;
-            border: 1px solid var(--input-border);
-            border-radius: 8px;
-            background-color: var(--input-bg);
-            color: var(--text-light);
-            font-size: 1rem;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .form-control-wrapper input::placeholder {
-            color: var(--placeholder-color);
-        }
-
-        .form-control-wrapper input:focus {
-            outline: none;
-            border-color: var(--green);
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 0.9rem;
-            background: var(--green);
-            color: var(--bg-panel);
-            font-size: 1.1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 1.5rem;
-            font-weight: 600;
-            transition: background 0.3s ease;
-        }
-
-        .login-btn:hover {
-            background: var(--green-hover);
-        }
-
-        .register-link {
-            text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.95rem;
-            color: var(--text-muted);
-        }
-
-        .register-link a {
-            color: var(--green);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-
-        .response-message {
-            margin-top: 1rem;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1rem;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppMiMetro - Iniciar Sesión</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
 </head>
 <body>
-<div class="login-container">
-    <div class="logo">
-        <i class="fas fa-metro"></i>
+<aside class="sidebar">
+    <div class="app-title">
+        <i class="fas fa-train-subway"></i> AppMiMetro
     </div>
-    <h1>AppMiMetro</h1>
-    <p>Inicia sesión para acceder a tu cuenta</p>
-
-    <form id="loginForm">
-        <div class="form-group">
+    <nav class="sidebar-nav">
+        <ul>
+            <li><a href="login.html" class="active"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a></li>
+            <li><a href="index.html"><i class="fas fa-user-plus"></i> Registrarse</a></li>
+        </ul>
+    </nav>
+</aside>
+<main class="main-content">
+    <h1>Iniciar Sesión</h1>
+    <div class="alert-panel form-wrapper">
+        <form id="loginForm">
             <label for="username">Usuario</label>
-            <div class="form-control-wrapper">
-                <i class="fas fa-user"></i>
-                <input type="text" id="username" placeholder="ej. juanperez" required />
-            </div>
-        </div>
+            <input type="text" id="username" placeholder="ej. juanperez" required>
 
-        <div class="form-group">
             <label for="password">Contraseña</label>
-            <div class="form-control-wrapper">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="••••••••" required />
+            <div class="password-wrapper">
+                <input type="password" id="password" placeholder="Ingresa tu contraseña" required>
+                <i class="fas fa-eye toggle-password" id="togglePassword"></i>
             </div>
-        </div>
 
-        <button type="submit" class="login-btn">Iniciar Sesión</button>
-    </form>
+            <button type="submit" id="submitBtn">
+                <span class="loader" id="loader" style="display: none;"></span>
+                <span id="buttonText">Iniciar Sesión</span>
+            </button>
 
-    <p id="response" class="response-message"></p>
-
-    <div class="register-link">
-        ¿No tienes una cuenta? <a href="index.html">Regístrate</a>
+            <p style="margin-top:1rem; text-align:center;">
+                ¿No tienes cuenta?
+                <a href="index.html" style="color: var(--green); text-decoration: none;">Regístrate</a>
+            </p>
+            <p id="response" class="response-message" style="text-align:center;margin-top:0.5rem;"></p>
+        </form>
     </div>
-</div>
+</main>
 
-<script src="login_2.js"></script>
+<script>
+    document.getElementById("loginForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const responseMessageElement = document.getElementById("response");
+        const loader = document.getElementById("loader");
+        const buttonText = document.getElementById("buttonText");
+        const submitBtn = document.getElementById("submitBtn");
+
+        // Mostrar loader y deshabilitar botón
+        loader.style.display = "inline-block";
+        buttonText.textContent = "Procesando...";
+        submitBtn.disabled = true;
+
+        responseMessageElement.innerText = "";
+        responseMessageElement.className = "response-message";
+        responseMessageElement.style.display = "none";
+
+        console.log("Intentando login con:", username);
+        const user = { username, password };
+
+        fetch("http://localhost:8081/api/usuarios/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(user)
+        })
+            .then(response => {
+                console.log("Respuesta recibida. Status:", response.status);
+                // Verificar si la respuesta es JSON
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    return response.json().then(data => {
+                        return { data, status: response.status, ok: response.ok };
+                    });
+                } else {
+                    return response.text().then(text => {
+                        return {
+                            data: { message: text },
+                            status: response.status,
+                            ok: response.ok
+                        };
+                    });
+                }
+            })
+            .then(({data, status, ok}) => {
+                console.log("Datos procesados:", data);
+                if (ok && status === 200) {
+                    // ✅ Login exitoso
+                    responseMessageElement.innerText = "✅ " + (data.message || "Login exitoso");
+                    responseMessageElement.className = "response-message success";
+                    responseMessageElement.style.display = "block";
+
+                    // Guardar en localStorage
+                    if (data.username) {
+                        localStorage.setItem('username', data.username);
+                        console.log("Usuario guardado:", data.username);
+                    }
+                    if (data.id) {
+                        localStorage.setItem('userId', data.id);
+                    }
+
+                    console.log("Redirigiendo a dashboard...");
+                    // Pequeña demora para que el usuario vea el mensaje de éxito
+                    setTimeout(() => {
+                        window.location.href = "dashboard.html";
+                    }, 1000);
+                } else {
+                    // ❌ Login fallido
+                    responseMessageElement.innerText = "❌ " + (data.message || "Error de autenticación. Código: " + status);
+                    responseMessageElement.className = "response-message error";
+                    responseMessageElement.style.display = "block";
+                    console.error("Error de login:", data);
+
+                    // Restaurar botón
+                    loader.style.display = "none";
+                    buttonText.textContent = "Iniciar Sesión";
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error("Error de conexión:", error);
+                responseMessageElement.innerText = "❌ Error de conexión: " + error.message;
+                responseMessageElement.className = "response-message error";
+                responseMessageElement.style.display = "block";
+
+                // Restaurar botón
+                loader.style.display = "none";
+                buttonText.textContent = "Iniciar Sesión";
+                submitBtn.disabled = false;
+            });
+    });
+
+    // Funcionalidad para mostrar/ocultar contraseña
+    document.getElementById("togglePassword").addEventListener("click", function() {
+        const passwordInput = document.getElementById("password");
+        const icon = this;
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    });
+</script>
+
+<style>
+    /* Estilos adicionales para el loader y mensajes de respuesta */
+    .loader {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--green);
+        border-radius: 50%;
+        border-top-color: var(--bg-dark);
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .response-message {
+        margin-top: 1rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .success {
+        background-color: rgba(74, 222, 128, 0.2);
+        color: var(--green);
+        border: 1px solid var(--green);
+    }
+
+    .error {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: var(--red);
+        border: 1px solid var(--red);
+    }
+</style>
 </body>
 </html>

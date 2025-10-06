@@ -1,18 +1,11 @@
 package com.appmimetro.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist; // Importa PrePersist
-import jakarta.persistence.Table;
-import java.time.LocalDateTime; // Importa LocalDateTime
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "fallas")
 public class Falla {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,22 +14,17 @@ public class Falla {
     private String tipo;
     private String detalles;
 
-    // ESTE ES EL CAMPO CLAVE QUE FALTABA
-    @Column(name = "fecha_reporte", nullable = false, updatable = false)
+    @Column(name = "fecha_reporte")  // <-- CORREGIDO: sin 's' al final
     private LocalDateTime fechaReporte;
 
+    // Constructor vacío
     public Falla() {}
 
+    // Constructor con parámetros
     public Falla(String estacion, String tipo, String detalles) {
         this.estacion = estacion;
         this.tipo = tipo;
         this.detalles = detalles;
-    }
-
-    // ESTE MÉTODO SE EJECUTA ANTES DE QUE SE GUARDE LA ENTIDAD
-    @PrePersist
-    protected void onCreate() {
-        fechaReporte = LocalDateTime.now(); // Asigna la fecha y hora actual automáticamente
     }
 
     // Getters y Setters
@@ -72,12 +60,19 @@ public class Falla {
         this.detalles = detalles;
     }
 
-    // NUEVOS GETTER Y SETTER PARA fechaReporte
     public LocalDateTime getFechaReporte() {
         return fechaReporte;
     }
 
     public void setFechaReporte(LocalDateTime fechaReporte) {
         this.fechaReporte = fechaReporte;
+    }
+
+    // Para que la fecha se asigne automáticamente al guardar
+    @PrePersist
+    protected void onCreate() {
+        if (fechaReporte == null) {
+            fechaReporte = LocalDateTime.now();
+        }
     }
 }
